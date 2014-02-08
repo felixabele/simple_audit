@@ -116,7 +116,7 @@ Audit ActiveRecord models. Somewhere in your (backend) views show the audit logs
 
 # Assumptions and limitations
 
-  * Your user model is called User and the current user User.current
+  * Your user model is called User (or Cms::User) and the current user User.current
     See [sentient_user](http://github.com/bokmann/sentient_user) for more information.
 
     
@@ -144,6 +144,10 @@ You can also customize the attribute of the User model which will be stored in t
 
     # default is :name
     simple_audit :username_method => :email
+
+As a default it will audit all save and update calls even though no changes where made, unless you specify :audit_changes_only => true
+
+  simple_audit :audit_changes_only => true
     
 ## Rendering audit trail
 

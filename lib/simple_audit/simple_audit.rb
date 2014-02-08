@@ -48,8 +48,10 @@ module SimpleAudit
 
           class_attribute :username_method
           class_attribute :audit_changes
+          class_attribute :audit_changes_only
 
           self.username_method = (options[:username_method] || :name).to_sym
+          self.audit_changes_only = options[:audit_changes_only] === true
 
           attributes_and_associations = proc do |record|
             changes = record.attributes
@@ -64,8 +66,8 @@ module SimpleAudit
 
           has_many :audits, :as => :auditable, :class_name => '::SimpleAudit::Audit'
 
-          after_create {|record| record.class.audit(record, :create)}
-          after_update {|record| record.class.audit(record, :update)}
+          after_create {|record| record.class.audit(record, :create, nil)}
+          after_update {|record| record.class.audit(record, :update, nil)}
         end
       end
 
@@ -79,15 +81,25 @@ module SimpleAudit
           user = Cms::User.current 
         end
 
-        if user.present?
-          record.audits.create(:user => user,
-            :username => user.try(self.username_method),
-            :action => action.to_s,
-            :change_log => self.audit_changes.call(record))
-        else
-          record.audits.create(
-            :action => action.to_s,
-            :change_log => self.audit_changes.call(record))
+        current_change_log = self.audit_changes.call(record)
+
+        # do only log if anything changed
+        record_changed = true
+        if audit_changes_only and last_change_log = record.audits.last
+          record_changed = last_change_log.change_log != current_change_log
+        end
+
+        if record_changed
+          if user.present?
+            record.audits.create(:user => user,
+              :username => user.try(self.username_method),
+              :action => action.to_s,
+              :change_log => current_change_log)
+          else
+            record.audits.create(
+              :action => action.to_s,
+              :change_log => current_change_log)
+          end
         end
       end
     end

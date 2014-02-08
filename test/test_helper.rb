@@ -4,7 +4,7 @@ require 'active_support/all'
 require 'active_record'
 require 'active_record/fixtures'
 require 'action_controller'
-require 'ruby-debug'
+#require 'ruby-debug'
 require 'ostruct'
 
 require File.join(File.dirname(__FILE__), "..", "generators", "simple_audit_migration", "templates", "migration.rb")
@@ -38,7 +38,7 @@ ActiveRecord::Migration.suppress_messages {
 
 class Person < ActiveRecord::Base
   has_one :address
-  simple_audit do |record|
+  simple_audit( :audit_changes_only => true ) do |record|
     {
       :name => record.name,
       :address => { :line_1 => record.address.line_1, :zip => record.address.zip }
