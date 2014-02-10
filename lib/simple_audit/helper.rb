@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module SimpleAudit #:nodoc:
   module Helper
     
@@ -20,11 +22,11 @@ module SimpleAudit #:nodoc:
                 "\n" + 
                 audited_model.class.human_attribute_name(k) +
                 ":" +
-                content_tag(:span, v.last, :class => 'current') +
-                content_tag(:span, v.first, :class => 'previous')
+                content_tag(:span, (v.last ? v.last.force_encoding("UTF-8") : '' ), :class => 'current') +
+                content_tag(:span, (v.first ? v.first.force_encoding("UTF-8") : '' ), :class => 'previous')
               end
             else
-              audit.change_log.sort{|x,y| audited_model.class.human_attribute_name(x.first) <=> audited_model.class.human_attribute_name(y.first)}.reject{|k, v| v.blank?}.collect {|k, v| "\n#{audited_model.class.human_attribute_name(k)}: #{v}"}
+              audit.change_log.sort{|x,y| audited_model.class.human_attribute_name(x.first) <=> audited_model.class.human_attribute_name(y.first)}.reject{|k, v| v.blank?}.collect {|k, v| "\n#{audited_model.class.human_attribute_name(k)}: v"}
             end
             raw changes.join
           end        
